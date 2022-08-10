@@ -15,29 +15,29 @@ from nltk import word_tokenize
 
 gs = Translator(from_lang='es', to_lang='en')
 
-#----------------------------- EXTRACCION DE DATOS DE COMENTARIOS EN UN .CSV---------------------------->
-with open('data.csv', 'w', newline="", encoding="utf-8")as file:
-    writer = csv.writer(file)
+# #----------------------------- EXTRACCION DE DATOS DE COMENTARIOS EN UN .CSV---------------------------->
+# with open('data.csv', 'w', newline="", encoding="utf-8")as file:
+#     writer = csv.writer(file)
 
-    # CABECERA
-    writer.writerow(['Date', 'Day', 'Post_id', 'Post_link', 'Commenter_id',
-                    'Commenter', 'Comment_link', 'Comment_text'])
+#     # CABECERA
+#     writer.writerow(['Date', 'Day', 'Post_id', 'Post_link', 'Commenter_id',
+#                     'Commenter', 'Comment_link', 'Comment_text'])
 
-    for post in get_posts(group='radiounotunja', pages=1, cookies="cookies.txt", options={'comments': True}):
-        text_comments = post['comments_full']
-        for comment in text_comments:
-            # ELIMINAMOS COMENTARIOS VACIOS Y STICKES
-            if(comment['comment_text'] != comment['commenter_name']):
-                text = comment['comment_text']
-                allchars = [str for str in text]
-                emoji_list = emoji.EMOJI_DATA
-                # ELIMINAMOS EMOJIS
-                clean_text = ' '.join(
-                    [str for str in text.split() if not any(i in str for i in emoji_list)])
-                if(not pd.isnull(clean_text) and clean_text != ''):
-                    data = [post['time'].strftime("%b %d %Y"), post['time'].strftime("%b %d"), post['post_id'], post['post_url'], comment['comment_id'], comment['commenter_name'],
-                            comment['comment_url'], clean_text]
-                    writer.writerow(data)
+#     for post in get_posts(group='radiounotunja', pages=1, cookies="cookies.txt", options={'comments': True}):
+#         text_comments = post['comments_full']
+#         for comment in text_comments:
+#             # ELIMINAMOS COMENTARIOS VACIOS Y STICKES
+#             if(comment['comment_text'] != comment['commenter_name']):
+#                 text = comment['comment_text']
+#                 allchars = [str for str in text]
+#                 emoji_list = emoji.EMOJI_DATA
+#                 # ELIMINAMOS EMOJIS
+#                 clean_text = ' '.join(
+#                     [str for str in text.split() if not any(i in str for i in emoji_list)])
+#                 if(not pd.isnull(clean_text) and clean_text != ''):
+#                     data = [post['time'].strftime("%b %d %Y"), post['time'].strftime("%b %d"), post['post_id'], post['post_url'], comment['comment_id'], comment['commenter_name'],
+#                             comment['comment_url'], clean_text]
+#                     writer.writerow(data)
 
 data = pd.read_csv('data.csv')
 print("=================================DATAFRAME===================================")
@@ -48,13 +48,12 @@ popularity_list = []
 
 for comment in data['Comment_text']:
     if (not pd.isnull(comment) and comment != 'nan'):
-        translation = gs.translate(comment)
-        analysis = TextBlob(translation)
+        analysis = TextBlob(comment)
         analysis = analysis.sentiment
         popularity = analysis.polarity
         popularity_list.append(popularity)
 
-#---------------------------------------FIGURA POPULARIDAD--------------------------------------->
+# #---------------------------------------FIGURA POPULARIDAD--------------------------------------->
 plot.figure(figsize=(9, 4))
 plot.scatter(data['Day'], popularity_list)
 plot.title('Post popularity')
@@ -121,6 +120,7 @@ def sentiment_analisis(words):
     plot.title('Sentiments frec words')
     plot.show()
 
+
 # =================================PALABRAS FRECUENTES===================================>
 wordfreg = {}
 for sentence in corpus:
@@ -137,65 +137,73 @@ sentiment_analisis(most_freg)
 
 
 analyzer = SentimentIntensityAnalyzer()
- 
-pos_count = 0
-pos_correct = 0
- 
-with open("positive-words.txt","r") as f:
-  for line in f.read().split('\n'):
-    vs = analyzer.polarity_scores(line)
-    if vs['compound'] > 0:
-      pos_correct += 1
-    pos_count +=1
- 
-neg_count = 0
-neg_correct = 0
- 
-with open("negative-words.txt","r") as f:
-  for line in f.read().split('\n'):
-    vs = analyzer.polarity_scores(line)
-    if vs['compound'] <= 0:
-      neg_correct += 1
-    neg_count +=1
-print("=================================PRUEBA VADER===================================")
-print("Precisión Positiva = {}% via {} samples".format(pos_correct/pos_count*100.0, pos_count))
-print("Precisión Negativa = {}% via {} samples".format(neg_correct/neg_count*100.0, neg_count))
 
 pos_count = 0
 pos_correct = 0
- 
-with open("positive-words.txt","r") as f:
-  for line in f.read().split('\n'):
-    analysis = TextBlob(line)
-    # print(line)
-    try:
-      if analysis.sentiment.polarity > 0:
-        pos_correct += 1
-      pos_count +=1
-    except:
-    #Mostramos este mensaje en caso de que se presente algún problema
-      print ("El elemento no está presente")
- 
+
+with open("positive-words.txt", "r") as f:
+    for line in f.read().split('\n'):
+        vs = analyzer.polarity_scores(line)
+        if vs['compound'] > 0:
+            pos_correct += 1
+        pos_count += 1
+
 neg_count = 0
 neg_correct = 0
- 
-with open("negative-words.txt","r") as f:
-  for line in f.read().split('\n'):
-    analysis = TextBlob(line)
-    # print(line)
-    try:
-      if analysis.sentiment.polarity <= 0:
-        neg_correct += 1
-      neg_count +=1
-    except:
-      print('el elemento no esta presente')
- 
+
+with open("negative-words.txt", "r") as f:
+    for line in f.read().split('\n'):
+        vs = analyzer.polarity_scores(line)
+        if vs['compound'] <= 0:
+            neg_correct += 1
+        neg_count += 1
+print("=================================PRUEBA VADER===================================")
+print("Precisión Positiva = {}% via {} samples".format(
+    pos_correct/pos_count*100.0, pos_count))
+print("Precisión Negativa = {}% via {} samples".format(
+    neg_correct/neg_count*100.0, neg_count))
+
+pos_count = 0
+pos_correct = 0
+
+with open("positive-words.txt", "r") as f:
+    for line in f.read().split('\n'):
+        analysis = TextBlob(line)
+        # print(line)
+        try:
+            if analysis.sentiment.polarity > 0:
+                pos_correct += 1
+            pos_count += 1
+        except:
+            # Mostramos este mensaje en caso de que se presente algún problema
+            print("El elemento no está presente")
+
+neg_count = 0
+neg_correct = 0
+
+with open("negative-words.txt", "r") as f:
+    for line in f.read().split('\n'):
+        analysis = TextBlob(line)
+        # print(line)
+        try:
+            if analysis.sentiment.polarity <= 0:
+                neg_correct += 1
+            neg_count += 1
+        except:
+            print('el elemento no esta presente')
+
 print("=================================PRUEBA TextBlob===================================")
-print("Precisión positiva = {}% via {} ejemplos".format(pos_correct/pos_count*100.0, pos_count))
-print("Precisión negativa = {}% via {} ejemplos".format(neg_correct/neg_count*100.0, neg_count))
+print("Precisión positiva = {}% via {} ejemplos".format(
+    pos_correct/pos_count*100.0, pos_count))
+print("Precisión negativa = {}% via {} ejemplos".format(
+    neg_correct/neg_count*100.0, neg_count))
 
 
 print("=================================ANALISIS DE SENTIMIENTOS POR COMENTARIO===================================")
+
+positive = 0
+negative = 0
+neutral = 0
 
 for comment in corpus:
     translation = gs.translate(comment)
@@ -203,7 +211,20 @@ for comment in corpus:
     print(comment)
     print(translation)
     for key in scores:
-        print(key, ': ', scores[key])
+        print(key, ':', scores[key])
+        if(key == 'compound'):
+            if(scores[key] > 0):
+                positive = positive+1
+                if(scores[key] == 0):
+                    neutral = neutral+1
+                    if(scores[key] < 0):
+                        negative = negative+1
+
+sentiments = [negative, positive, neutral]
+tags = ["Negative", "Positive", "Neutral"]
+plot.pie(sentiments, labels=tags, autopct="%0.1f %%")
+plot.title('Sentiments total comments')
+plot.show()
 
 print("================================INFORMACION DEL SISTEMA Y MODULOS NECESARIOS=======================================")
 # from sinfo import sinfo
