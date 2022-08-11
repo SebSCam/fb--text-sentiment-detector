@@ -12,6 +12,9 @@ from translate import Translator
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk import sentiment
 from nltk import word_tokenize
+import nltk
+nltk.download('punkt')
+nltk.download('vader_lexicon')
 
 gs = Translator(from_lang='es', to_lang='en')
 
